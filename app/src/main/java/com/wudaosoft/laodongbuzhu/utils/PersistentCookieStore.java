@@ -22,9 +22,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by Administrator on 2018/3/13.
+ * Created 2018/3/13 10:08.
+ *
+ * @author Changsoul.Wu
  */
-
 public class PersistentCookieStore implements CookieStore {
 
     private static final String LOG_TAG = "PersistentCookieStore";

@@ -21,15 +21,14 @@ import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
- * Created by Administrator on 2018/3/13.
+ * Created 2018/3/13 10:08.
+ *
+ * @author Changsoul.Wu
  */
-
 public class HttpRequest {
 
     private static HttpRequest mInstance;
-    private Context context;
     private OkHttpClient okHttpClient;
-
 
     public static HttpRequest getInstance(Context context) {
         if (mInstance == null) {
@@ -42,8 +41,7 @@ public class HttpRequest {
         return mInstance;
     }
 
-    public HttpRequest(Context context) {
-        this.context = context;
+    private HttpRequest(Context context) {
 
         CookieHandler cookieHandler = new CookieManager(new PersistentCookieStore(context),
                 CookiePolicy.ACCEPT_ALL);
@@ -54,12 +52,11 @@ public class HttpRequest {
 
 
         okHttpClient = new OkHttpClient.Builder()
-                .readTimeout(7676, TimeUnit.MILLISECONDS)
-                .connectTimeout(7676, TimeUnit.MILLISECONDS)
+                .readTimeout(7000, TimeUnit.MILLISECONDS)
+                .connectTimeout(7000, TimeUnit.MILLISECONDS)
                 .addInterceptor(logging)
                 .cookieJar(new JavaNetCookieJar(cookieHandler))
                 .build();
-
     }
 
     public Response execute(Request request) throws IOException {
@@ -78,17 +75,10 @@ public class HttpRequest {
 
     public void async(Request request, final AsyncCallback asyncCallback) throws IOException {
 
-        okHttpClient.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                Toast.makeText(context, "网络请求失败", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                asyncCallback.onResponse(call, response);
-            }
-        });
+        okHttpClient.newCall(request).enqueue(asyncCallback);
     }
 
+    public OkHttpClient getOkHttpClient() {
+        return okHttpClient;
+    }
 }

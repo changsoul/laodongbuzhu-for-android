@@ -6,6 +6,11 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.net.HttpCookie;
 
+/**
+ * Created 2018/3/13 10:08.
+ *
+ * @author Changsoul.Wu
+ */
 public class SerializableHttpCookie implements Serializable {
     
     private static final long serialVersionUID = 1L;
