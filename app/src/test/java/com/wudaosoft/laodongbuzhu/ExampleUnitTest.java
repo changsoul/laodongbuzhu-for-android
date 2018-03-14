@@ -1,5 +1,7 @@
 package com.wudaosoft.laodongbuzhu;
 
+import android.net.Uri;
+
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -17,8 +19,6 @@ public class ExampleUnitTest {
 
     @Test
     public void testNet() throws Exception {
-
-
 
         assertTrue(1 == 1);
     }
