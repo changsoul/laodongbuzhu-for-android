@@ -10,13 +10,16 @@ import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Cookie;
 import okhttp3.FormBody;
 import okhttp3.Headers;
+import okhttp3.HttpUrl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -51,17 +54,17 @@ public class HttpRequest {
         CookieHandler cookieHandler = new CookieManager(new PersistentCookieStore(context),
                 CookiePolicy.ACCEPT_ALL);
 
-
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
 
         okHttpClient = new OkHttpClient.Builder()
                 .readTimeout(7000, TimeUnit.MILLISECONDS)
                 .connectTimeout(7000, TimeUnit.MILLISECONDS)
-                .addInterceptor(logging)
+                //.addInterceptor(logging)
                 .cookieJar(new JavaNetCookieJar(cookieHandler))
                 .build();
+
+        CookieUtil.setCookies(okHttpClient, "Cookie1", DomainConfig.SERVER_ID);
     }
 
     public Response execute(Request request) throws IOException {
@@ -131,7 +134,7 @@ public class HttpRequest {
             if (url.indexOf("?") != -1) {
                 Uri uri = Uri.parse(url);
 
-                url = uri.getScheme() + "://" + uri.getAuthority();
+                url = uri.getScheme() + "://" + uri.getAuthority() + uri.getPath();
 
                 Set<String> queries = uri.getQueryParameterNames();
 
@@ -204,12 +207,14 @@ public class HttpRequest {
 
     public void setHeader(Request.Builder rb, Headers hds) {
 
-        Headers.Builder hb = null;
+        Headers.Builder hb;
 
-        if (hds != null)
+        if (hds == null) {
             hb = new Headers.Builder();
+            hds = hb.build();
+        }
         else
-            hds.newBuilder();
+            hb = hds.newBuilder();
 
         if (hds.get("Accept") == null) {
             hb.add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
