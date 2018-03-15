@@ -5,21 +5,19 @@ import android.net.Uri;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.wudaosoft.laodongbuzhu.exception.ServiceException;
 
 import java.io.IOException;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import okhttp3.Cookie;
 import okhttp3.FormBody;
 import okhttp3.Headers;
-import okhttp3.HttpUrl;
 import okhttp3.JavaNetCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -61,27 +59,31 @@ public class HttpRequest {
                 .readTimeout(7000, TimeUnit.MILLISECONDS)
                 .connectTimeout(7000, TimeUnit.MILLISECONDS)
                 //.addInterceptor(logging)
+                .cache(null)
                 .cookieJar(new JavaNetCookieJar(cookieHandler))
                 .build();
 
         CookieUtil.setCookies(okHttpClient, "Cookie1", DomainConfig.SERVER_ID);
     }
 
-    public Response execute(Request request) throws IOException {
+    public Response execute(Request request) throws Exception {
+        Response response = okHttpClient.newCall(request).execute();
 
-        return okHttpClient.newCall(request).execute();
+        if (!response.isSuccessful())
+            new ServiceException(response.code() + " Request Fail");
+
+        return response;
     }
 
-    public String string(Request request) throws IOException {
+    public String string(Request request) throws Exception {
         return execute(request).body().string();
     }
 
-    public JSONObject json(Request request) throws IOException {
+    public JSONObject json(Request request) throws Exception {
         return JSON.parseObject(string(request));
     }
 
-
-    public void async(Request request, final AsyncCallback asyncCallback) throws IOException {
+    public void async(Request request, final AsyncCallback asyncCallback) {
 
         okHttpClient.newCall(request).enqueue(asyncCallback);
     }
@@ -212,8 +214,7 @@ public class HttpRequest {
         if (hds == null) {
             hb = new Headers.Builder();
             hds = hb.build();
-        }
-        else
+        } else
             hb = hds.newBuilder();
 
         if (hds.get("Accept") == null) {

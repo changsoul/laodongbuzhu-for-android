@@ -32,14 +32,14 @@ public class CookieUtil {
 
     public static void setCookies(OkHttpClient okHttpClient, String name, String value) {
 
-        HttpUrl httpUrl = HttpUrl.parse(DomainConfig.DOMAIN);
+        HttpUrl httpUrl = HttpUrl.parse(DomainConfig.DOMAIN.endsWith("/") ? DomainConfig.DOMAIN : DomainConfig.DOMAIN + "/");
         Cookie cookie = new Cookie.Builder().name(name).value(value).domain(httpUrl.host()).path("/").build();
 
         okHttpClient.cookieJar().saveFromResponse(httpUrl, Collections.singletonList(cookie));
     }
 
     public static void setCookies(OkHttpClient okHttpClient, Cookie cookie) {
-        okHttpClient.cookieJar().saveFromResponse(HttpUrl.parse(DomainConfig.LOGIN_PAGE), Collections.singletonList(cookie));
+        okHttpClient.cookieJar().saveFromResponse(HttpUrl.parse(DomainConfig.DOMAIN.endsWith("/") ? DomainConfig.DOMAIN : DomainConfig.DOMAIN + "/"), Collections.singletonList(cookie));
     }
 
 }

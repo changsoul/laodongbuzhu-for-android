@@ -84,6 +84,6 @@ public abstract class AsyncCallback<T> implements Callback {
 
     public abstract void onFail(final Call call, final Exception e);
 
-    public abstract void onSuccess(final Call call, final T response);
+    public abstract void onSuccess(final Call call, final T response) throws IOException;
 
 }
