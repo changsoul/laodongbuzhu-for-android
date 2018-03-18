@@ -46,10 +46,10 @@ public abstract class ListAdapter<T> extends BaseAdapter {
 
         ViewHolder holder = ViewHolder.createIfNull(context, convertView, layoutId, parent, position);
 
-        setViewDate(holder, getItem(position));
+        setViewData(holder, getItem(position));
 
         return holder.getConvertView();
     }
 
-    public abstract void setViewDate(ViewHolder holder, T data);
+    public abstract void setViewData(ViewHolder holder, T data);
 }
