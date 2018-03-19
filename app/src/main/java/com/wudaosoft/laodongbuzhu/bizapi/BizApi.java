@@ -5,18 +5,27 @@ import android.graphics.Bitmap;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.wudaosoft.laodongbuzhu.exception.ServiceException;
+import com.wudaosoft.laodongbuzhu.model.ApplyStatus;
 import com.wudaosoft.laodongbuzhu.model.LoginInfo;
 import com.wudaosoft.laodongbuzhu.model.UserInfo;
 import com.wudaosoft.laodongbuzhu.utils.BitmapCallback;
 import com.wudaosoft.laodongbuzhu.utils.CookieUtil;
+import com.wudaosoft.laodongbuzhu.utils.DateUtil;
 import com.wudaosoft.laodongbuzhu.utils.DomainConfig;
 import com.wudaosoft.laodongbuzhu.utils.EncryptUtil;
 import com.wudaosoft.laodongbuzhu.utils.HttpRequest;
 import com.wudaosoft.laodongbuzhu.utils.JsonCallback;
+import com.wudaosoft.laodongbuzhu.utils.StringCallback;
+import com.wudaosoft.laodongbuzhu.utils.StringUtils;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,6 +58,10 @@ public class BizApi {
         http = HttpRequest.getInstance(context);
     }
 
+    /**
+     * 获取图片验证码
+     * @param callback
+     */
     public void loadValiCodeImage(final BizCallback callback) {
 
         http.async(http.get(DomainConfig.IMAGE_CHECK), new BitmapCallback() {
@@ -70,7 +83,7 @@ public class BizApi {
      * @return
      * @throws Exception
      */
-    public LoginInfo preLogin() throws Exception {
+    private LoginInfo preLogin() throws Exception {
 
         String loginForm = http.string(http.get(DomainConfig.LOGIN_PAGE));
 
@@ -86,19 +99,19 @@ public class BizApi {
     /**
      * 登录
      *
-     * @param userInfo
+     * @param account
+     * @param password
      * @param imagCheck
-     * @param userInfo
-     * @return
+     * @return JSONObject
      * @throws Exception
      */
-    public JSONObject login(final UserInfo userInfo, String imagCheck) throws Exception {
+    public JSONObject login(String account, String password, String imagCheck) throws Exception {
 
         LoginInfo info = preLogin();
 
-        String pwd = EncryptUtil.encrypt(info.get_1_(), userInfo.getPassword(), context);
+        String pwd = EncryptUtil.encrypt(info.get_1_(), password, context);
         Map<String, String> params = new HashMap<>();
-        params.put("LOGINID", userInfo.getLoginId());
+        params.put("LOGINID", account);
         params.put("PASSWORD", pwd);
         params.put("IMAGCHECK", imagCheck);
         params.put("ISCA", "false");
@@ -114,11 +127,10 @@ public class BizApi {
     /**
      * 退出登录
      *
-     * @param userInfo
-     * @return
+     * @param account
      * @throws Exception
      */
-    public void logout(final UserInfo userInfo, final BizCallback callback) throws Exception {
+    public void logout(final String account, final BizCallback callback) {
 
         String sessionId = CookieUtil.getCookieValue("JSESSIONIDGDLDWQ", http.getOkHttpClient());
 
@@ -133,19 +145,345 @@ public class BizApi {
 
             @Override
             public void onSuccess(Call call, JSONObject response) throws IOException {
-                Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] logout data: " + response);
+                Log.d(TAG, "UserId[" + account+ "] logout data: " + response);
 
                 callback.post(response);
             }
         });
     }
 
-    public String findHiddenInputValue(String text, String keyName) {
+    /**
+     * 获取结果页面源码
+     * @return String
+     * @throws Exception
+     */
+    private String getResultPageSourceCode() throws Exception {
+
+        return http.string(http.get(DomainConfig.QUERY_RESULT));
+    }
+
+
+    private JSONObject getApplyRecord() throws Exception {
+
+        String source = getResultPageSourceCode();
+        String dataStr = findValue(source, APPLY_RECORD_PATTERN);
+        JSONObject data = null;
+        try {
+            data = JSON.parseObject(dataStr);
+        } catch (JSONException e) {
+        }
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] apply record data: " + data);
+
+        return data;
+    }
+	 
+
+	/*public JSONObject getApplyRecord(UserInfo userInfo) throws Exception {
+		Map<String, String> params = new HashMap<>();
+		params.put("confid", "ldlzy_gryw_grbtsb_bt_q_l");
+		params.put("dynDictWhereCls", "null");
+		params.put("dsId", "");
+		params.put("rowstart", "1");
+		params.put("pageSize", "20");
+		params.put("whereCls", "  a.BCC859 = c.BCC859(+)  and a.BCC857 = '2553150' and a.BOE545='01'");
+
+		JSONObject data = request.postAjax(DomainConfig.DOMAIN, DomainConfig.GLT_PAGE, params, userInfo.getContext());
+
+		Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] apply record data: " + data);
+
+		return data;
+	}*/
+
+    /**
+     * 获取在官网上的申请ID
+     *
+     * @param userInfo
+     * @return
+     * @throws Exception
+     */
+    public String getApplyId(UserInfo userInfo) throws Exception {
+
+        JSONObject data = getApplyRecord(userInfo);
+
+        if (data == null)
+            return null;
+
+        int rowCount = data.getIntValue("total");
+        String id = null;
+
+//		String year = DateUtil.date2String(serverTime.getTime(), "yyyy");
+
+        if (rowCount > 0) {
+
+            for (int i = rowCount - 1; i >= 0; i--) {
+
+                JSONObject row = data.getJSONArray("rows").getJSONObject(i);
+
+                String aab080 = row.getString("AAB080");
+//				if (aab080 == null || !aab080.startsWith(year))
+//					continue;
+                if (aab080 == null)
+                    continue;
+
+                String acc78b = row.getString("ACC78B");
+
+                if (acc78b == null)
+                    continue;
+
+                id = findValue(acc78b, APPLY_ID_PATTERN);
+                id = "".equals(id) ? null : id;
+
+                Log.i(TAG, "UserId[" + userInfo.getLoginId() + "] applyId: " + id);
+
+                if (acc78b.contains("未提交")) {//审核中
+
+                    userInfo.setApplyStatus(ApplyStatus.unsubmit);
+
+                } else if (acc78b.contains("审核中")) {
+
+                    userInfo.setApplyStatus(ApplyStatus.appling);
+                } else if (acc78b.contains("办理成功")) {
+
+                    userInfo.setApplyStatus(ApplyStatus.passed);
+                }
+
+                break;
+            }
+        }
+
+        return id;
+    }
+
+    public Map<String, Object> getApplyPageData(UserInfo userInfo) throws Exception {
+
+        String html = http.string(http.get(DomainConfig.APPLY_DADA_PAGE));
+
+        //Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] getApplyPageData source code: " + html);
+
+        Document doc = Jsoup.parse(html);
+        Elements elements = doc.select("form[name='gtForm'] input, form[name='gtForm'] select");
+        Map<String, Object> data = new HashMap<>();
+
+        elements.forEach(e -> {
+
+            boolean isSelect = "select".equals(e.tagName());
+
+            String name = e.attr("name");
+            String value = isSelect ? e.getElementsByAttribute("selected").val() : e.val();
+
+            if(StringUtils.isNotBlank(name)) {
+
+                if(data.containsKey(name) && StringUtils.isBlank(data.get(name)) && StringUtils.isNotBlank(value)) {
+                    data.put(name, value);
+                } else {
+                    data.put(name, value);
+                }
+
+                if(isSelect) {
+                    String text = e.text();
+                    String[] texts = text.split("-");
+                    if("CCE029".equals(name) && texts.length == 2) {
+                        data.put("_DIC_" + name, texts[1]);
+                    } else
+                        data.put("_DIC_" + name, text);
+                }
+            }
+            //System.out.println(e.attr("vldStr") + "[=]" +  e.attr("name") + "=" + e.val());
+        });
+
+        //data.put("readOnly", "false");
+        data.put("edit", "true");
+        data.put("AAB080", DateUtil.today());
+        data.put("_multiple", Arrays.asList("", ""));
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] getApplyPageData: " + JSON.toJSONString(data));
+
+        return data;
+    }
+
+    /**
+     * 检查是否已提交成功
+     *
+     * @param id
+     * @param userInfo
+     * @return
+     * @throws Exception
+     */
+    public boolean checkIfHasSubmitted(String id, UserInfo userInfo) throws Exception {
+        Map<String, Object> params = new HashMap<>();
+        params.put("BCC859", id);
+
+        String rs = doService("btxxService.checkIfHasSubmitted", params, userInfo);
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] checkIfHasSubmitted: " + rs);
+
+        return "[true]".equals(rs);
+    }
+
+    public boolean submitBtxx(final Map<String, Object> params, UserInfo userInfo) throws Exception {
+
+        String rs = doService("btxxService.submitBtxx", params, userInfo);
+
+        Log.i(TAG, "UserId[" + userInfo.getLoginId() + "] SY2:" + params.get("SYZBS") + " submitBtxx: " + rs);
+
+        JSONObject obj = JSON.parseArray(rs).getJSONObject(0);
+
+        if("1".equals(obj.getString("flag"))){
+            mainForm.writeMsg("操作成功! SY2:" + params.get("SYZBS"), userInfo);
+            return true;
+        }
+
+        if("true".equals(obj.getString("SFSBKJYYC"))){
+            //不是成功提交
+
+            params.put("BCC859", obj.getString("YWLSH"));
+
+            mainForm.writeMsg(obj.getString("SBKERRMSG"), userInfo);
+
+            return false;
+        }
+        else{
+            //CFW.oWin.fnAlert('申请信息已经提交到'+document.gtForm.BCC864NAME.value+'人力资源和社会保障局，请于5个工作日内携带规定的资料去受理部门书面申请培训补贴！');
+//			document.gtForm.BCC859.value = obj.getString("YWLSH");
+//			document.gtForm.readOnly.value = "true" ;
+//			document.gtForm.action = "/gdweb/ggfw/web/wsyw/app/ldlzy/gryw/grbtsb/btxx!toTjS.do";
+//			document.gtForm.submit();
+            params.put("BCC859", obj.getString("YWLSH"));
+            params.put("readOnly", "true");
+
+            Map<String, String> pars = new HashMap<>();
+
+            params.entrySet().forEach(e -> pars.put(e.getKey(), e.getValue().toString()));
+
+            String subRs = request.post(DomainConfig.DOMAIN, DomainConfig.APPLY_DADA_SUBMIT, pars, userInfo.getContext());
+
+            Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] submitApplyData: " + subRs);
+
+            mainForm.writeMsg("申请信息已经提交到" + params.get("BCC864NAME") + "人力资源和社会保障局，请于5个工作日内携带规定的资料去受理部门书面申请培训补贴！", userInfo);
+        }
+
+        return true;
+    }
+
+    public Map<String, Object> getZsxx(UserInfo userInfo) throws Exception {
+
+        Map<String, Object> data = userInfo.getApplyData();
+        Map<String, Object> params = new HashMap<>();
+
+        params.put("BHE034", data.get("BHE034"));// 证书类别
+        params.put("CCE029", data.get("CCE029"));// 证书级别
+        params.put("BCC867", data.get("BCC867"));// 工种流水号
+        params.put("AAB080", data.get("AAB080"));// 申报日期
+        params.put("AAC058", data.get("AAC058"));// 身份证件类型
+        params.put("AAC147", data.get("AAC147"));// 身份证件号码
+        params.put("AAC003", data.get("AAC003"));// 姓名
+        params.put("BOE531", data.get("BOE531"));// 户口类别
+        params.put("BCC870", data.get("BCC870"));// 是否贫困家庭学员
+        params.put("BOD215", data.get("BOD215"));// 现居住地（行政区划）
+        params.put("BCC864", data.get("BCC864"));// 申请鉴定地
+        params.put("BCC859", data.get("BCC859"));// 个人补贴申请流水号
+        params.put("BHB321", data.get("BHB321"));// 工种别名信息维护表流水号
+        params.put("edit", data.get("edit"));// 编辑标志
+
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] getZsxx parametes: " + JSON.toJSONString(params));
+
+        if (StringUtils.isBlank(data.get("BCC864")) || StringUtils.isBlank(data.get("BHE034"))
+                || StringUtils.isBlank(data.get("CCE029")) || StringUtils.isBlank(data.get("BCC867"))
+                || StringUtils.isBlank(data.get("AAB080")) || StringUtils.isBlank(data.get("AAC058"))
+                || StringUtils.isBlank(data.get("AAC147")) || StringUtils.isBlank(data.get("AAC003"))) {
+
+            throw new ServiceException("getZsxx error. Illegal parameters: " + JSON.toJSONString(params));
+        }
+
+        String rs = doService("btxxService.getZsxx", params, userInfo);
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] getZsxx: " + rs);
+
+        JSONObject obj = JSON.parseArray(rs).getJSONObject(0);
+
+        int bcc229 = obj.getIntValue("BCC229");
+        int bca060 = obj.getIntValue("BCC869");
+        int syzbs = obj.getIntValue("SY2");
+        boolean isLackOfIndicators = obj.getBooleanValue("isLackOfIndicators");
+
+        data.put("BCC290", obj.get("BCC290"));
+        data.put("BCC868", obj.get("BCC868"));
+        data.put("BCA060", bca060 + "");
+        data.put("BCC869", bca060 + "");
+        data.put("ZSBAE001", obj.get("ZSBAE001"));
+        data.put("ACC560", obj.get("ZSBAE001"));
+        data.put("BCC229", bcc229 + "");
+        data.put("BCC871", bcc229 + "");
+        data.put("BCC856", obj.get("BCC856"));
+        data.put("SYZBS", syzbs);
+        data.put("BCEA6Z", obj.get("BCEA6Z"));
+        data.put("isLackOfIndicators", isLackOfIndicators);
+        data.put("ZJ", (bcc229 + bca060) + "");
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] getZsxx data: " + JSON.toJSONString(data));
+
+        return data;
+    }
+
+    public String doService(String serviceName, Map<String, Object> params, UserInfo userInfo) throws Exception {
+
+        String[] acts = serviceName.split("\\.");
+
+        List<Map<String, Object>> list = new ArrayList<>();
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("serviceId", acts[0]);
+        map.put("method", acts[1]);
+        map.put("parameters", params);
+
+        list.add(map);
+
+        Map<String, String> tmpParams = new HashMap<>();
+        tmpParams.put("parameters", JSON.toJSONString(list));
+        tmpParams.put("method", "{}");
+        tmpParams.put("shareArguments", "{}");
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] doService: " + serviceName + ", parameter: " + JSON.toJSONString(tmpParams));
+
+        JSONObject result = http.json(http.postAjax(DomainConfig.AJAX_ADAPTER, tmpParams));
+
+        Log.d(TAG, "UserId[" + userInfo.getLoginId() + "] doService: " + serviceName + ", result: " + result);
+
+        // String token = result.getString("Token");
+        String fhz = result.getString("FHZ");
+        // String msg = result.getString("MSG");
+
+        if (!"1".equals(fhz)) {
+            // if ("loginTimeout".equals(fhz)) {
+            //
+            // JOptionPane.showMessageDialog(mainForm, "登录超时，请重新登录！" + msg,
+            // "提示", JOptionPane.WARNING_MESSAGE);
+            // } else if ("CSRF".equals(fhz)) {
+            //
+            // JOptionPane.showMessageDialog(mainForm, msg, "提示",
+            // JOptionPane.WARNING_MESSAGE);
+            // } else {
+            //
+            // JOptionPane.showMessageDialog(mainForm, msg, "错误",
+            // JOptionPane.WARNING_MESSAGE);
+            // }
+            // return "";
+
+            throw new ServiceException("Do Service[" + serviceName + "] error. msg: " + result);
+        } else {
+            return result.getString("RTN");
+        }
+    }
+
+    private String findHiddenInputValue(String text, String keyName) {
         Pattern pattern = Pattern.compile("<input type=\"hidden\" name=\"" + keyName + "\" value=\"(.+?)\" />");
         return findValue(text, pattern);
     }
 
-    public String findValue(String text, Pattern pattern) {
+    private String findValue(String text, Pattern pattern) {
         Matcher matcher = pattern.matcher(text);
         matcher.reset();
         boolean result = matcher.find();
@@ -156,7 +494,7 @@ public class BizApi {
         }
     }
 
-    public void toast(String msg) {
+    private void toast(String msg) {
         Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
     }
 }

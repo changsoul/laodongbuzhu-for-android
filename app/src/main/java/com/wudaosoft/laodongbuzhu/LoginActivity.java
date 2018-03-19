@@ -156,6 +156,8 @@ public class LoginActivity extends AppCompatActivity {
         if (requestCode == REQUEST_INTERNET) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 populateAutoComplete();
+            } else {
+                finish();
             }
         }
     }
@@ -223,7 +225,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private boolean isPasswordValid(String password) {
-        //TODO: Replace this with your own logic
         return password.length() > 4;
     }
 
