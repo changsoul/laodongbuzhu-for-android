@@ -288,7 +288,7 @@ public class LoginActivity extends AppCompatActivity {
             user.setPassword(mPassword);
 
             try {
-                JSONObject loginRs = bizApi.login(user, mValiCode);
+                JSONObject loginRs = bizApi.login(mAccount, mPassword, mValiCode);
 
                 String flag = loginRs.getString("flag");
                 String message = loginRs.getString("message");

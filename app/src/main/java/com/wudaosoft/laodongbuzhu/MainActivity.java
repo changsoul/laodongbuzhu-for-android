@@ -3,13 +3,19 @@ package com.wudaosoft.laodongbuzhu;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
-import android.widget.TextView;
+
+import com.wudaosoft.laodongbuzhu.view.HomeFragment;
+import com.wudaosoft.laodongbuzhu.view.NoSlidingViewPaper;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mTextMessage;
+    private NoSlidingViewPaper mViewPager;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -18,13 +24,13 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
-                    mTextMessage.setText(R.string.title_home);
+                    mViewPager.setCurrentItem(0);
                     return true;
                 case R.id.navigation_dashboard:
-                    mTextMessage.setText(R.string.title_dashboard);
+                    mViewPager.setCurrentItem(1);
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_profile);
+                    mViewPager.setCurrentItem(2);
                     return true;
             }
             return false;
@@ -36,7 +42,26 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mTextMessage = (TextView) findViewById(R.id.message);
+        /*初始化显示内容*/
+        mViewPager = (NoSlidingViewPaper) findViewById(R.id.vp_main_container);
+        final ArrayList<Fragment> fgLists = new ArrayList<>(3);
+        fgLists.add(new HomeFragment());
+        fgLists.add(new HomeFragment());
+        fgLists.add(new HomeFragment());
+        FragmentPagerAdapter mAdapter = new FragmentPagerAdapter(getSupportFragmentManager()) {
+            @Override
+            public Fragment getItem(int position) {
+                return fgLists.get(position);
+            }
+
+            @Override
+            public int getCount() {
+                return fgLists.size();
+            }
+        };
+        mViewPager.setAdapter(mAdapter);
+        mViewPager.setOffscreenPageLimit(2); //预加载剩下两页
+
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
