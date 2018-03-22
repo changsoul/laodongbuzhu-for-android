@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginLeft="8dp"
-    android:layout_marginTop="8dp"
     android:layout_marginRight="8dp"
-    android:clickable="true">
+    android:layout_marginTop="8dp"
+    android:clickable="true" android:focusable="true">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -31,7 +31,7 @@
                 android:textColor="@color/blue_light"
                 android:textSize="16sp"
                 android:textStyle="bold"
-                tools:text="林龙鑫" />
+                tools:text="1719011008500334" />
 
             <TextView
                 android:id="@+id/type"
@@ -39,26 +39,44 @@
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorAccent"
                 android:textSize="16sp"
-                tools:text="消费" />
+                tools:text="审核中" />
         </LinearLayout>
 
         <TextView
             android:id="@+id/consume_num"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="40dp"
+            android:textColor="@color/grey"
             android:textSize="14sp"
-            tools:text="消费金额：6.7" />
+            tools:text="补贴金额" />
 
-        <TextView
-            android:id="@+id/remain_num"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"
-            tools:text="卡里余额：99.5" />
+            android:layout_marginRight="16dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/doler_char"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                tools:text="￥" />
+
+            <TextView
+                android:id="@+id/butia_amount"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="40sp"
+                android:textStyle="bold"
+                tools:text="2200" />
+
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -70,16 +88,15 @@
 
             <TextView
                 android:id="@+id/consume_address"
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                tools:text="兴业苑/小燕子超市" />
+                tools:text="申报日期：" />
 
             <TextView
                 android:id="@+id/time"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                tools:text="2015-12-01 09:56" />
+                tools:text="2018-01-15" />
 
         </LinearLayout>
 
