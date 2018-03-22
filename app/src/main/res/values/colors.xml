@@ -9,4 +9,5 @@
     <color name="divider">@color/grey</color>
 
     <color name="grey">#e0e0e0</color>
+    <color name="black">#000000</color>
 </resources>

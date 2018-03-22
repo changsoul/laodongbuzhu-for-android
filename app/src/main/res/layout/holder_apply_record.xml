@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="40dp"
+            android:layout_marginTop="30dp"
             android:textColor="@color/grey"
             android:textSize="14sp"
             tools:text="补贴金额" />
@@ -66,6 +66,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="20sp"
                 android:textStyle="bold"
+                android:textColor="@color/black"
                 tools:text="￥" />
 
             <TextView
@@ -74,6 +75,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="40sp"
                 android:textStyle="bold"
+                android:textColor="@color/black"
                 tools:text="2200" />
 
         </LinearLayout>
@@ -83,7 +85,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
 
             <TextView
