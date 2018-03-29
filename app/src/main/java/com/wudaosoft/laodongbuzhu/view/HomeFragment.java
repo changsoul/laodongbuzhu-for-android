@@ -1,5 +1,6 @@
 package com.wudaosoft.laodongbuzhu.view;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -15,6 +16,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.wudaosoft.laodongbuzhu.R;
+import com.wudaosoft.laodongbuzhu.model.ApplyRecord;
 
 import cn.lemon.view.RefreshRecyclerView;
 import cn.lemon.view.adapter.Action;
@@ -31,34 +33,36 @@ public class HomeFragment extends BaseFragement{
     private CardRecordAdapter mAdapter;
     private Handler mHandler;
     private int page = 1;
+    private Context mContext;
 
     @Override
-    protected void initView() {
+    protected void initView(View view) {
         mHandler = new Handler();
 
-        FloatingActionButton mFab = (FloatingActionButton) findViewById(R.id.fab);
+        mContext = getContext();
 
-        mAdapter = new CardRecordAdapter(this);
+        mAdapter = new CardRecordAdapter(mContext);
 
         //添加Header
-        final TextView textView = new TextView(this);
-        textView.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.dip2px(48)));
+        final TextView textView = new TextView(mContext);
+        textView.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dip2px(48)));
         textView.setTextSize(16);
         textView.setGravity(Gravity.CENTER);
         textView.setText("重庆邮电大学");
         mAdapter.setHeader(textView);
         //添加footer
-        final TextView footer = new TextView(this);
-        footer.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, Utils.dip2px(48)));
+        final TextView footer = new TextView(mContext);
+        footer.setLayoutParams(new LinearLayoutCompat.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dip2px(48)));
         footer.setTextSize(16);
         footer.setGravity(Gravity.CENTER);
         footer.setText("-- Footer --");
         mAdapter.setFooter(footer);
 
-        mRecyclerView = (RefreshRecyclerView) findViewById(R.id.recycler_view);
+        mRecyclerView = (RefreshRecyclerView) view.findViewById(R.id.lemon_recycler_view);
         mRecyclerView.setSwipeRefreshColors(0xFF437845, 0xFFE44F98, 0xFF2FAC21);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(this,2));
+        mRecyclerView.setLayoutManager(new GridLayoutManager(mContext,2));
         mRecyclerView.setAdapter(mAdapter);
+
         mRecyclerView.addRefreshAction(new Action() {
             @Override
             public void onAction() {
@@ -82,12 +86,6 @@ public class HomeFragment extends BaseFragement{
             }
         });
 
-        mFab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAdapter.remove(1);
-            }
-        });
 
     }
 
@@ -111,41 +109,38 @@ public class HomeFragment extends BaseFragement{
         }, 1500);
     }
 
-    public Consumption[] getVirtualData() {
-        return new Consumption[]{
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼"),
-                new Consumption("Demo", "2015-12-18 12:09", "消费", 9.7f, 24.19f, "兴业源三楼")
+    public ApplyRecord[] getVirtualData() {
+        return new ApplyRecord[]{
+                new ApplyRecord("876545648974654564", "未提交", "2630", "2018-02-09", "美容师"),
         };
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main_activity, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.multi_adapter) {
-            startActivity(new Intent(this, CustomMultiTypeActivity.class));
-            return true;
-        }
+//        if (item.getItemId() == R.id.multi_adapter) {
+//            startActivity(new Intent(this, CustomMultiTypeActivity.class));
+//            return true;
+//        }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public int getLayoutId() {
         return R.layout.fragment_home;
     }
+
     @Override
     protected void getDataFromServer() {
         Toast.makeText(mContext, "HomeFragment页面请求数据了", Toast.LENGTH_SHORT).show();
+    }
+
+    public int dip2px(float dpValue) {
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+    public int px2dip(float pxValue) {
+        final float scale = mContext.getResources().getDisplayMetrics().density;
+        return (int) (pxValue / scale + 0.5f);
     }
 }

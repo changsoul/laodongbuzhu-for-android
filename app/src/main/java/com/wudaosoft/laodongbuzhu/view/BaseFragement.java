@@ -29,13 +29,13 @@ public abstract class BaseFragement extends Fragment {
         mContext = getContext();
         mView = inflater.inflate(getLayoutId(), null);
         isViewInitiated = true;
-        initView();
+        initView(mView);
         prepareGetData();
         return mView;
     }
 
     /*初始化页面布局和数据*/
-    protected abstract void initView();
+    protected abstract void initView(View mView);
     /*布局*/
     public abstract int getLayoutId();
     /*服务器获取数据*/

@@ -9,7 +9,7 @@ import cn.lemon.view.adapter.BaseViewHolder;
 import cn.lemon.view.adapter.RecyclerAdapter;
 
 
-class CardRecordAdapter extends RecyclerAdapter<ApplyRecord> {
+public class CardRecordAdapter extends RecyclerAdapter<ApplyRecord> {
 
     public CardRecordAdapter(Context context) {
         super(context);
