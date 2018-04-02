@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     tools:context="com.wudaosoft.laodongbuzhu.MainActivity">
 
-    <com.wudaosoft.laodongbuzhu.NoSlidingViewPaper
+    <com.wudaosoft.laodongbuzhu.view.NoSlidingViewPaper
         android:id="@+id/vp_main_container"
         android:layout_width="match_parent"
         android:layout_height="0dp"

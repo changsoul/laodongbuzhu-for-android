@@ -1,14 +1,10 @@
 package com.wudaosoft.laodongbuzhu.view;
 
 import android.content.Context;
-import android.content.Intent;
 import android.os.Handler;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutCompat;
-import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.Gravity;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,9 +54,9 @@ public class HomeFragment extends BaseFragement{
         footer.setText("-- Footer --");
         mAdapter.setFooter(footer);
 
-        mRecyclerView = (RefreshRecyclerView) view.findViewById(R.id.lemon_recycler_view);
+        mRecyclerView = (RefreshRecyclerView) view.findViewById(R.id.recycler_view);
         mRecyclerView.setSwipeRefreshColors(0xFF437845, 0xFFE44F98, 0xFF2FAC21);
-        mRecyclerView.setLayoutManager(new GridLayoutManager(mContext,2));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);
 
         mRecyclerView.addRefreshAction(new Action() {
@@ -112,6 +108,7 @@ public class HomeFragment extends BaseFragement{
     public ApplyRecord[] getVirtualData() {
         return new ApplyRecord[]{
                 new ApplyRecord("876545648974654564", "未提交", "2630", "2018-02-09", "美容师"),
+                new ApplyRecord("876545648974654564", "未提交", "2630", "2018-02-09", "美容师")
         };
     }
 

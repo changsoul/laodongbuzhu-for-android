@@ -48,9 +48,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginTop="30dp"
-            android:textColor="@color/grey"
             android:textSize="14sp"
-            tools:text="补贴金额" />
+            android:text="补贴金额" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -64,10 +63,11 @@
                 android:id="@+id/doler_char"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="23sp"
-                android:textStyle="bold"
+                android:paddingTop="0dp"
+                android:text="￥"
                 android:textColor="@color/black"
-                tools:text="￥" />
+                android:textSize="25sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/apply_amount"
@@ -92,7 +92,7 @@
                 android:id="@+id/lb_job"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                tools:text="工种" />
+                android:text="工种" />
 
             <TextView
                 android:id="@+id/apply_job"
@@ -115,7 +115,7 @@
                 android:id="@+id/lb_date"
                 android:layout_width="70dp"
                 android:layout_height="wrap_content"
-                tools:text="申报日期" />
+                android:text="申报日期" />
 
             <TextView
                 android:id="@+id/apply_date"
