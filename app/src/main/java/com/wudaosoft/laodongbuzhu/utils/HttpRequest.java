@@ -70,7 +70,7 @@ public class HttpRequest {
         Response response = okHttpClient.newCall(request).execute();
 
         if (!response.isSuccessful())
-            new ServiceException(response.code() + " Request Fail");
+            throw new ServiceException(response.code() + " Request Fail");
 
         return response;
     }
